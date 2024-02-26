@@ -3,17 +3,17 @@ import prisma from '../models/prismaClient';
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import validator from "validator"
+import 'dotenv/config';
 
 
 
-
-const createToken = (_id: number) => {
-    return jwt.sign({_id}, process.env.SECRET || '', {expiresIn: '3d'})
+const createToken = (id: number) => {
+    return jwt.sign({id}, process.env.SECRET || 'mycryptoapp', {expiresIn: '3d'})
 }
 
 export const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
-  
+   
     try {
       const user = await prisma.user.findUnique({ where: { email } });
   
@@ -66,3 +66,8 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(400).json({error: error.message })
     }
   }
+
+  //test
+  export const secureRoute = (req: Request, res: Response) => {
+    res.status(200).json({ message: 'This route is protected' });
+  };
