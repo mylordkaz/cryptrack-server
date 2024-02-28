@@ -2,72 +2,63 @@ import { Request, Response } from 'express';
 import prisma from '../models/prismaClient';
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import validator from "validator"
-import 'dotenv/config';
+import validator from 'validator';
+import dotenv from 'dotenv';
+dotenv.config();
 
 
+const SECRET = process.env.SECRET; //"my_secret"
 
-const createToken = (id: number) => {
-    return jwt.sign({id}, process.env.SECRET || 'mycryptoapp', {expiresIn: '3d'})
+export const registerUser = async (req:Request, res:Response) => {
+  const { username, email, password } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    if(!email || !password){
+      throw new Error('All fields must be filled')
+    }
+    if (!validator.isEmail(email)){
+      throw new Error('Email not valid')
+    }
+    if(!validator.isStrongPassword(password)){
+      throw new Error('Password not strong enough')
+    }
+
+    const exist = await prisma.user.findUnique({where: {email}})
+    if(exist){
+      throw new Error('email already in use')
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+      },
+    });
+
+    res.status(201).json({ id: user.id, username: user.username });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 }
-
 export const loginUser = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-   
-    try {
-      const user = await prisma.user.findUnique({ where: { email } });
-  
-      if (!user) {
-        throw new Error('Incorrect email');
-      }
-  
-      const match = await bcrypt.compare(password, user.password);
-  
-      if (!match) {
-        throw new Error('Incorrect password');
-      }
-  
-      // create a token
-      const token = createToken(user.id);
-  
-      res.status(200).json({ email, token });
-    } catch (error:any) {
-      res.status(400).json({ error: error.message });
-    }
-  };
+  const { email, password } = req.body;
 
-  export const registerUser = async (req: Request, res: Response) => {
-    const {username, email, password} = req.body
+  const user = await prisma.user.findUnique({ where: { email } });
 
-    try {
-        if (!email || !password){
-            throw new Error('All fields must be filled')
-        }
-        if(!validator.isEmail(email)){
-            throw new Error('Email not valid')
-        }
-        if(!validator.isStrongPassword(password)){
-            throw new Error('Password not strong enough')
-        }
-        const exist = await prisma.user.findUnique({where: {email}})
-
-        if (exist){
-            throw new Error('Email already in use')
-        }
-
-        const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password, salt)
-
-        const newUser = await prisma.user.create({data: {username, email, password: hash }})
-        const token = createToken(newUser.id)
-
-        res.status(200).json({email, token})
-    } catch (error:any) {
-        res.status(400).json({error: error.message })
-    }
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).json({ message: 'Invalid credentials' });
   }
 
-  //test
-  export const secureRoute = (req: Request, res: Response) => {
-    res.status(200).json({ message: 'This route is protected' });
-  };
+  if(!SECRET){
+    console.error("SECRET is not defined in the environment variable")
+    return res.status(500).send('Internal Server Error')
+  }
+
+  const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {expiresIn: '3d'});
+
+  res.json({ token });
+};

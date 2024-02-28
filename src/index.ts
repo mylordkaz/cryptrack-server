@@ -1,19 +1,17 @@
-import  express  from "express";
+import express from 'express';
 import cors from "cors"
-import router from "./routes/authRoutes";
-import { authenticateToken } from "./middleware/authMiddleware";
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 
-const PORT = process.env.PORT || 3000
-const app = express()
+const app = express();
+const PORT = 3000;
 
-app.use(express.json())
+app.use(express.json());
 app.use(cors())
 
+app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 
-app.use('/api/auth', router)
-app.use('/api/secure', authenticateToken, router)
-
-
-app.listen(PORT, () =>{
-    console.log(`Server is running on http://localhost:${PORT}`)
-})
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

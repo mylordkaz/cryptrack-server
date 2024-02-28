@@ -1,32 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import 'dotenv/config';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
-
+const SECRET = process.env.SECRET
 interface AuthenticatedRequest extends Request {
   user?: any; 
 }
 
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const token = req.header('Authorization');
-  console.log('Received Token:', token);
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: Missing token' });
-  }
-  console.log("request header:", req.headers)
-  
-  try {
-    
-    console.log('Secret:', process.env.SECRET || 'mycryptoapp');
+export const authenticateToken = (req:AuthenticatedRequest, res: Response, next: NextFunction) =>{
+  const token = req.header("Authorization")?.split(' ')[1]
 
-    const decoded = jwt.verify(token, process.env.SECRET || 'mycryptoapp') as any;
-    
-
-    req.user = decoded;
-    
-    
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  if(!token){
+    return res.sendStatus(401).send({ error: 'Unauthorized: Missing token' });
   }
-};
+  if(!SECRET){
+    console.error("SECRET is not defined in the environment variable")
+    return res.status(500).send('Internal Server Error')
+  }
+
+  jwt.verify(token, SECRET, (err:any, user:any) =>{
+    if(err){
+      return res.sendStatus(403)
+    }
+    req.user = user
+    next()
+  })
+}
