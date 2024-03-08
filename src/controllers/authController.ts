@@ -65,22 +65,29 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const logoutUser = async (req: Request, res: Response) => {
-  const token = req.header('Authorization')?.split(' ')[1];
+  try {
+    const token = req.header('Authorization')?.split(' ')[1];
 
-  if (!token) {
-    return res.status(401);
+    if (!token) {
+      return res.status(401).send('No token');
+    }
+
+    const isTokenBlacklisted = await prisma.blacklistedToken.findUnique({
+      where: { token },
+    });
+
+    if (isTokenBlacklisted) {
+      return res.sendStatus(401); // already invalidated
+    }
+
+    // add token to blacklist
+    await prisma.blacklistedToken.create({
+      data: { token },
+    });
+
+    res.sendStatus(200); // Logout successful
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.sendStatus(500); // Internal Server Error
   }
-
-  const isTokenBlacklisted = await prisma.blacklistedToken.findUnique({
-    where: { token },
-  });
-  if (isTokenBlacklisted) {
-    return res.sendStatus(401); //already invalidated
-  }
-
-  // add token to blacklist
-  await prisma.blacklistedToken.create({
-    data: { token },
-  });
-  res.status(200);
 };
