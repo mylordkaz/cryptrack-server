@@ -18,8 +18,19 @@ export const getTransactions = async (
   res: Response
 ) => {
   try {
+    const { name } = req.query;
+
+    let whereClause = { userId: req.user.id } as any;
+
+    if (name) {
+      whereClause = {
+        ...whereClause,
+        name: { contains: name as string },
+      };
+    }
+
     const transactions = await prisma.transaction.findMany({
-      where: { userId: req.user.id },
+      where: whereClause,
     });
 
     if (transactions.length === 0) {
