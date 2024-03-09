@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import prisma from '../models/prismaClient';
 
 interface AuthenticatedRequest extends Request {
-    user?: any; 
-  }
+  user?: any;
+}
 
-export const getUserProfile = async (req: AuthenticatedRequest, res: Response) => {
+export const getUserProfile = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   const userId = req.user.id;
-
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
 

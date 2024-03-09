@@ -26,7 +26,8 @@ model Transaction {
   id            Int         @id @default(autoincrement())
   name          String
   price         Float
-  amount        Float 
+  amount        Float?
+  quantity      Float
   date          DateTime    @default(now())
   userId        Int
   

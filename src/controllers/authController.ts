@@ -60,13 +60,17 @@ export const loginUser = async (req: Request, res: Response) => {
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
     expiresIn: '3d',
   });
-
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  });
   res.json({ token });
 };
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    const token = req.header('Authorization')?.split(' ')[1];
+    const token = req.cookies.authToken;
 
     if (!token) {
       return res.status(401).send('No token');
@@ -84,7 +88,13 @@ export const logoutUser = async (req: Request, res: Response) => {
     await prisma.blacklistedToken.create({
       data: { token },
     });
-
+    // remove token from cookie
+    res.cookie('authToken', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: true,
+      sameSite: 'strict',
+    });
     res.sendStatus(200); // Logout successful
   } catch (error) {
     console.error('Error during logout:', error);

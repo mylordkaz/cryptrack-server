@@ -1,21 +1,27 @@
 import express from 'express';
 import cors, { CorsOptions } from 'cors';
+import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import transactionRoutes from './routes/transactionsRoutes';
+import cryptoRoutes from './routes/cryptoRoutes';
 
 const app = express();
 const PORT = 3000;
 
 const corsOptions: CorsOptions = {
-  origin: 'http://localhost:5174', // Add your frontend origin(s) here
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  origin: 'http://localhost:5174',
+  credentials: true,
 };
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
+app.use('/transactions', transactionRoutes);
+app.use('/cryptos', cryptoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
