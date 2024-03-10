@@ -13,6 +13,16 @@ interface Totals {
   [name: string]: number;
 }
 
+interface AddTransactionRequest extends AuthenticatedRequest {
+  body: {
+    name: string;
+    price: number;
+    amount?: number;
+    quantity: number;
+    date?: Date;
+  };
+}
+
 export const getTransactions = async (
   req: AuthenticatedRequest,
   res: Response
@@ -82,6 +92,66 @@ export const getTotalAmounts = async (
     res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching transactions:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+export const addTransaction = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { name, price, quantity, date } = req.body;
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        name,
+        price,
+        quantity,
+        date: date || new Date(),
+        userId: req.user.id,
+      },
+    });
+    res.status(201).json(transaction);
+  } catch (error) {
+    console.error('Error adding transaction:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+export const deleteTransaction = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { transactionId } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: parseInt(transactionId) },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction no found' });
+    }
+
+    if (transaction.userId !== userId) {
+      return res
+        .status(403)
+        .json({ message: 'Not authorized to delete this transaction' });
+    }
+
+    await prisma.transaction.delete({
+      where: { id: parseInt(transactionId) },
+    });
+
+    res.status(200).json({ message: 'Transaction deleted successfully' });
+  } catch (error) {
+    console.log('Error deleting transaction:', error);
     res.status(500).send('Internal Server Error');
   }
 };
