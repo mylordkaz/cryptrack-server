@@ -11,8 +11,6 @@ const SECRET = process.env.SECRET; //"my_secret"
 export const registerUser = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   try {
     if (!email || !password) {
       throw new Error('All fields must be filled');
@@ -29,6 +27,8 @@ export const registerUser = async (req: Request, res: Response) => {
       throw new Error('email already in use');
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         username,
@@ -37,7 +37,21 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json({ id: user.id, username: user.username });
+    if (!SECRET) {
+      console.error('SECRET is not defined in the environment variable');
+      return res.status(500).send('Internal Server Error');
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
+      expiresIn: '3d',
+    });
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+
+    res.status(201).json({ id: user.id, username: user.username, token });
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
