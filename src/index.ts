@@ -5,9 +5,11 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import transactionRoutes from './routes/transactionsRoutes';
 import cryptoRoutes from './routes/cryptoRoutes';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT;
 
 const corsOptions: CorsOptions = {
   origin: 'http://localhost:5173',
