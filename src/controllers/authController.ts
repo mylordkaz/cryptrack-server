@@ -48,7 +48,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
 
     res.status(201).json({ id: user.id, username: user.username, token });
@@ -77,7 +77,7 @@ export const loginUser = async (req: Request, res: Response) => {
   res.cookie('authToken', token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
+    sameSite: 'none',
   });
   res.json({ token });
 };
@@ -107,7 +107,7 @@ export const logoutUser = async (req: Request, res: Response) => {
       httpOnly: true,
       expires: new Date(0),
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     res.sendStatus(200); // Logout successful
   } catch (error) {
