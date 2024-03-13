@@ -8,7 +8,8 @@
     "start": "ts-node ./src/index.ts",
     "startDeploy": "node ./dist/index.js",
     "build": "tsc",
-    "deploy": "prisma migrate deploy"
+    "deploy": "prisma migrate deploy",
+    "postinstall": "npm install --save-dev @types/express"
   },
   "keywords": [],
   "author": "",
