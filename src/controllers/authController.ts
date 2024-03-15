@@ -48,7 +48,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
     });
 
     res.status(201).json({ id: user.id, username: user.username, token });
