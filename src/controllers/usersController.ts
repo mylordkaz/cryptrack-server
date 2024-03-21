@@ -32,28 +32,33 @@ export const updateUserProfile = async (
   const userId = req.user.id;
   const { username, email, currentPassword, newPassword } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
-  if (!(await bcrypt.compare(currentPassword, user.password))) {
-    return res.status(401).json({ message: 'Invalid current password' });
-  }
-
   try {
-    const newHash = await bcrypt.hash(newPassword, 10);
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    let newHash = user.password;
+
+    if (
+      newPassword &&
+      currentPassword &&
+      (await bcrypt.compare(currentPassword, user.password))
+    ) {
+      newHash = await bcrypt.hash(newPassword, 10);
+    } else if (newPassword) {
+      return res.status(401).json({ message: 'Invalid current password' });
+    }
 
     await prisma.user.update({
       where: { id: userId },
       data: {
-        username: username,
-        email: email,
+        username: username || user.username,
+        email: email || user.email,
         password: newHash,
       },
     });
-    res.json({ massage: 'Profile updated succesfully' });
+    res.json({ message: 'Profile updated succesfully' });
   } catch (error) {
     res.status(500).send('Internal Server Error');
   }
