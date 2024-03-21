@@ -5,6 +5,12 @@ import bcrypt from 'bcrypt';
 interface AuthenticatedRequest extends Request {
   user?: any;
 }
+interface UpdateProfileRequest {
+  username?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}
 
 export const getUserProfile = async (
   req: AuthenticatedRequest,
@@ -30,36 +36,49 @@ export const updateUserProfile = async (
   res: Response
 ) => {
   const userId = req.user.id;
-  const { username, email, currentPassword, newPassword } = req.body;
+  const { username, email, currentPassword, newPassword } =
+    req.body as UpdateProfileRequest;
+  const updateData: { username?: string; email?: string; password?: string } =
+    {};
+
+  if (username) {
+    updateData.username = username;
+  }
+
+  if (email) {
+    updateData.email = email;
+  }
+
+  if (newPassword && currentPassword && userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isCurrentPasswordValid) {
+      res.status(401).json({ message: 'Invalid current password' });
+      return;
+    }
+    updateData.password = await bcrypt.hash(newPassword, 10);
+  } else if (newPassword && !currentPassword) {
+    res
+      .status(400)
+      .json({ message: 'Current password is required for password update.' });
+    return;
+  }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    let newHash = user.password;
-
-    if (
-      newPassword &&
-      currentPassword &&
-      (await bcrypt.compare(currentPassword, user.password))
-    ) {
-      newHash = await bcrypt.hash(newPassword, 10);
-    } else if (newPassword) {
-      return res.status(401).json({ message: 'Invalid current password' });
-    }
-
     await prisma.user.update({
       where: { id: userId },
-      data: {
-        username: username || user.username,
-        email: email || user.email,
-        password: newHash,
-      },
+      data: updateData,
     });
-    res.json({ message: 'Profile updated succesfully' });
+    res.json({ message: 'Profile updated successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).send('Internal Server Error');
   }
 };
