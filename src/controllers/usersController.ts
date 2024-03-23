@@ -82,3 +82,17 @@ export const updateUserProfile = async (
     res.status(500).send('Internal Server Error');
   }
 };
+
+export const deleteUser = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user.id;
+
+  try {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+    res.json({ message: 'Account successfully deleted.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete account.' });
+  }
+};
