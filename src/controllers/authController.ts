@@ -80,7 +80,7 @@ export const loginUser = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    sameSite: 'lax',
+    sameSite: 'none',
   });
   res.cookie('authToken', token, {
     httpOnly: true,
