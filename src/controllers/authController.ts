@@ -75,6 +75,13 @@ export const loginUser = async (req: Request, res: Response) => {
   const token = jwt.sign({ id: user.id, email: user.email }, SECRET, {
     expiresIn: '3d',
   });
+  const test = 1;
+  res.cookie('test', test, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    sameSite: 'lax',
+  });
   res.cookie('authToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
