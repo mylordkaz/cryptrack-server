@@ -47,8 +47,8 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     res.cookie('authToken', token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
     });
 
     res.status(201).json({ id: user.id, username: user.username, token });
@@ -76,8 +76,8 @@ export const loginUser = async (req: Request, res: Response) => {
   });
   res.cookie('authToken', token, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
   });
   res.json({ token });
 };
@@ -106,8 +106,8 @@ export const logoutUser = async (req: Request, res: Response) => {
     res.cookie('authToken', '', {
       httpOnly: true,
       expires: new Date(0),
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
     });
     res.sendStatus(200); // Logout successful
   } catch (error) {
