@@ -48,6 +48,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      path: '/',
       sameSite: 'lax',
     });
 
@@ -77,6 +78,7 @@ export const loginUser = async (req: Request, res: Response) => {
   res.cookie('authToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    path: '/',
     sameSite: 'lax',
   });
   res.json({ token });
@@ -107,6 +109,7 @@ export const logoutUser = async (req: Request, res: Response) => {
       httpOnly: true,
       expires: new Date(0),
       secure: process.env.NODE_ENV === 'production',
+      path: '/',
       sameSite: 'lax',
     });
     res.sendStatus(200); // Logout successful
