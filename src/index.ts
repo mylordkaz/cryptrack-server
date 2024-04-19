@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT;
 
 const corsOptions: CorsOptions = {
-  origin: 'https://mycryptrack.netlify.app',
+  origin: 'https://cryptrack-client.onrender.com',
   // origin : 'http://localhost:5173',
   credentials: true,
 };
