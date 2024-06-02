@@ -47,7 +47,6 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     res.cookie('authToken', token, {
       httpOnly: true,
-      //domain: '.onrender.com',
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'none',
@@ -79,7 +78,6 @@ export const loginUser = async (req: Request, res: Response) => {
 
   res.cookie('authToken', token, {
     httpOnly: true,
-    // domain: '.onrender.com',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     sameSite: 'none',
@@ -110,7 +108,6 @@ export const logoutUser = async (req: Request, res: Response) => {
     // remove token from cookie
     res.cookie('authToken', '', {
       httpOnly: true,
-      //domain: '.onrender.com',
       expires: new Date(0),
       secure: process.env.NODE_ENV === 'production',
       path: '/',
