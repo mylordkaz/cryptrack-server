@@ -9,11 +9,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 const corsOptions: CorsOptions = {
   origin: 'https://cryptrack-client.onrender.com',
-  // origin : 'http://localhost:5173',
+  //origin: 'http://localhost:5173',
   credentials: true,
 };
 
