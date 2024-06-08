@@ -49,7 +49,7 @@ export const registerUser = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
 
     res.status(201).json({ id: user.id, username: user.username, token });
@@ -80,8 +80,9 @@ export const loginUser = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    sameSite: 'lax',
+    sameSite: 'none',
   });
+  console.log('Set-Cookie:', res.getHeaders()['set-cookie']);
   res.json({ token });
 };
 
@@ -111,7 +112,7 @@ export const logoutUser = async (req: Request, res: Response) => {
       expires: new Date(0),
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
     res.sendStatus(200); // Logout successful
   } catch (error) {
