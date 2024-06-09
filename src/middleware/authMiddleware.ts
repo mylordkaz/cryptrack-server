@@ -13,7 +13,7 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies.authToken;
+  const token = req.cookies.accessToken;
 
   if (!token) {
     return res.status(401).send({ error: 'Unauthorized: Missing token' });
