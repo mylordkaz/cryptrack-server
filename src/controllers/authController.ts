@@ -6,7 +6,19 @@ import validator from 'validator';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const SECRET = process.env.SECRET; //"my_secret"
+const SECRET = process.env.SECRET || 'my_secret';
+const REFRESH = process.env.REFRESH_SECRET || 'my_refresh_secret';
+
+const generateAccessToken = (user: any) => {
+  return jwt.sign({ id: user.id, email: user.email }, SECRET, {
+    expiresIn: '15m',
+  });
+};
+const generateRefreshToken = (user: any) => {
+  return jwt.sign({ id: user.id, email: user.email }, REFRESH, {
+    expiresIn: '15m',
+  });
+};
 
 export const registerUser = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
