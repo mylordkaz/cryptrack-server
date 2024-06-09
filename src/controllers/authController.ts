@@ -104,13 +104,13 @@ export const loginUser = async (req: Request, res: Response) => {
   console.log('access Token:', accessToken);
   console.log('refresh Token:', refreshToken);
 
-  res.cookie('authToken', accessToken, {
+  res.cookie('AccessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     sameSite: 'none',
   });
-  res.cookie('authToken', refreshToken, {
+  res.cookie('RefreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
