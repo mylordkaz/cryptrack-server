@@ -49,11 +49,6 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    // if (!SECRET) {
-    //   console.error('SECRET is not defined in the environment variable');
-    //   return res.status(500).send('Internal Server Error');
-    // }
-
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -81,43 +76,31 @@ export const registerUser = async (req: Request, res: Response) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  console.log('loginUser called'); // Log to check if the function is called
-  console.log('Request body:', req.body);
 
   const user = await prisma.user.findUnique({ where: { email } });
-  console.log('User found:', user);
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    console.log('Invalid credentials');
     return res.status(401).json({ message: 'Invalid credentials' });
   }
-
-  // if (!SECRET) {
-  //   console.error('SECRET is not defined in the environment variable');
-  //   return res.status(500).send('Internal Server Error');
-  // }
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
-  console.log('access Token:', accessToken);
-  console.log('refresh Token:', refreshToken);
-
-  res.cookie('AccessToken', accessToken, {
+  res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     sameSite: 'none',
   });
-  res.cookie('RefreshToken', refreshToken, {
+  res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     sameSite: 'none',
   });
 
-  console.log('Set-Cookie:', res.getHeaders()['set-cookie']);
   res.json({ accessToken, refreshToken });
 };
 
@@ -137,11 +120,10 @@ export const logoutUser = async (req: Request, res: Response) => {
       return res.sendStatus(401); // already invalidated
     }
 
-    // add token to blacklist
     await prisma.blacklistedToken.create({
       data: { token: refreshToken },
     });
-    // remove token from cookie
+
     res.cookie('accessToken', '', {
       httpOnly: true,
       expires: new Date(0),
