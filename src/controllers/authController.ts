@@ -56,13 +56,13 @@ export const registerUser = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
 
     res.status(201).json({
@@ -92,13 +92,13 @@ export const loginUser = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    sameSite: 'lax',
+    sameSite: 'none',
   });
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    sameSite: 'lax',
+    sameSite: 'none',
   });
 
   res.json({ accessToken, refreshToken });
@@ -129,14 +129,14 @@ export const logoutUser = async (req: Request, res: Response) => {
       expires: new Date(0),
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
     res.cookie('refreshToken', '', {
       httpOnly: true,
       expires: new Date(0),
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
 
     res.sendStatus(200); // Logout successful
@@ -165,13 +165,13 @@ export const refreshToken = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      sameSite: 'lax',
+      sameSite: 'none',
     });
 
     res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
